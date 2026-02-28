@@ -1,0 +1,12 @@
+[project]
+name = "spreadsheet-tts"
+version = "0.1.0"
+description = "Google Sheetsのテキストを Gemini TTS API で音声ファイル(WAV)に自動変換するツール"
+requires-python = ">=3.10"
+dependencies = [
+    "google-genai",
+    "gspread",
+    "google-auth",
+    "pyyaml",
+    "python-dotenv",
+]
