@@ -1,11 +1,29 @@
+import logging
 from pathlib import Path
 
+import google.auth
 import gspread
 from google.oauth2.service_account import Credentials
 
 from .config import column_letter_to_index
 
+logger = logging.getLogger(__name__)
+
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+
+
+def _get_credentials(auth_config: dict):
+    """認証情報を取得する。サービスアカウントキーがあればそちらを、なければADCを使用。"""
+    key = auth_config.get("service_account_key", "")
+    key_path = Path(key) if key else None
+
+    if key_path and key_path.exists():
+        logger.info("認証: サービスアカウントキー (%s)", key_path)
+        return Credentials.from_service_account_file(str(key_path), scopes=SCOPES)
+
+    logger.info("認証: Application Default Credentials (ADC)")
+    creds, _ = google.auth.default(scopes=SCOPES)
+    return creds
 
 
 def fetch_texts(config: dict) -> list[str]:
@@ -14,12 +32,7 @@ def fetch_texts(config: dict) -> list[str]:
     auth_config = config["auth"]
 
     # 認証
-    key_path = Path(auth_config["service_account_key"])
-    if not key_path.exists():
-        raise FileNotFoundError(
-            f"サービスアカウント鍵ファイルが見つかりません: {key_path}"
-        )
-    creds = Credentials.from_service_account_file(str(key_path), scopes=SCOPES)
+    creds = _get_credentials(auth_config)
     client = gspread.authorize(creds)
 
     # スプレッドシートを開く
