@@ -40,9 +40,11 @@ def _save_wav(filepath: Path, pcm_data: bytes) -> None:
 
 def _build_prompt(text: str, style_prompt: str) -> str:
     """テキストとスタイル指示からTTSプロンプトを構築する。"""
+    parts = []
     if style_prompt:
-        return f"{style_prompt}\n\n{text}"
-    return text
+        parts.append(style_prompt)
+    parts.append(f"Read the following text aloud exactly as written:\n\n{text}")
+    return "\n\n".join(parts)
 
 
 def _extract_audio_data(response) -> bytes:
