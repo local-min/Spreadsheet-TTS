@@ -26,6 +26,16 @@ def load_config(config_path: str = "config.yaml") -> dict:
         )
     config["auth"]["gemini_api_key"] = api_key
 
+    # スプレッドシートIDを環境変数から取得（.envを優先、config.yamlにフォールバック）
+    spreadsheet_id = os.environ.get("SPREADSHEET_ID", "").strip()
+    if spreadsheet_id:
+        config["google_sheets"]["spreadsheet_id"] = spreadsheet_id
+    if not config["google_sheets"].get("spreadsheet_id"):
+        raise ValueError(
+            "スプレッドシートIDが設定されていません。"
+            ".envファイルに SPREADSHEET_ID を設定してください。"
+        )
+
     return config
 
 
