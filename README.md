@@ -18,9 +18,9 @@ Google Sheets  →  Python Script  →  Gemini TTS API  →  WAV Files
 
 - Python 3.10 以上
 - [uv](https://docs.astral.sh/uv/)
+- [Google Cloud CLI (`gcloud`)](https://cloud.google.com/sdk/docs/install)
 - Google アカウント
 - Gemini API キー
-- Google Cloud サービスアカウント（Sheets読み取り用）
 
 ## セットアップ
 
@@ -30,33 +30,27 @@ Google Sheets  →  Python Script  →  Gemini TTS API  →  WAV Files
 2. 「APIキーを作成」をクリック
 3. 表示されたAPIキーをコピーして控えておく
 
-### 2. Google Cloud サービスアカウントの作成
-
-Google Sheetsにプログラムからアクセスするための認証情報です。
+### 2. Google Sheets API の有効化と認証
 
 1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
 2. 上部の「プロジェクトを選択」→「**新しいプロジェクト**」→ 任意の名前で作成
 3. 左メニュー「**APIとサービス**」→「**ライブラリ**」
    - 「Google Sheets API」を検索 → **有効にする**
-4. 左メニュー「**APIとサービス**」→「**認証情報**」
-   - 「**＋認証情報を作成**」→「**サービスアカウント**」を選択
-   - 名前を入力（例: `spreadsheet-tts`）→ 作成
-5. 作成したサービスアカウントをクリック
-   - 「**鍵**」タブ →「**鍵を追加**」→「**新しい鍵を作成**」→ **JSON** を選択
-   - JSONファイルが自動ダウンロードされる
-6. JSONファイル内の `client_email`（例: `xxx@project.iam.gserviceaccount.com`）をコピー
-7. 対象の **Google スプレッドシート** を開き、共有ボタンから **そのメールアドレスに「閲覧者」として共有**
+4. ターミナルで ADC（Application Default Credentials）認証を実行
 
-> **注意**: 「OAuthクライアントID」ではなく「**サービスアカウント**」を選んでください
+```bash
+gcloud auth application-default login
+```
+
+ブラウザが開くので Google アカウントでログインします。これにより自分のアカウント権限で Google Sheets にアクセスできるようになります。
+
+> **補足**: サービスアカウントキーを使う場合は、キーファイルのパスを `config.yaml` の `auth.service_account_key` に設定してください。ADC より優先されます。
 
 ### 3. プロジェクトのセットアップ
 
 ```bash
 # 依存パッケージのインストール
 uv sync
-
-# サービスアカウント鍵の配置
-cp ~/Downloads/ダウンロードしたファイル名.json ./credentials.json
 
 # 環境変数の設定
 cp .env.example .env
@@ -135,7 +129,7 @@ output:
 
 # 認証
 auth:
-  service_account_key: "./credentials.json"
+  service_account_key: ""           # 空=ADCを使用 / パス指定=サービスアカウントキー
   gemini_api_key_env: "GEMINI_API_KEY"
 ```
 
@@ -177,7 +171,6 @@ style_prompt: "穏やかで優しいトーンで、ゆっくりと語りかけ�
 | エラー | 原因と対処 |
 |--------|-----------|
 | `環境変数 GEMINI_API_KEY が設定されていません` | `.env` ファイルにAPIキーが正しく記載されていない |
-| `サービスアカウント鍵ファイルが見つかりません` | `credentials.json` がプロジェクトルートにない |
-| `missing fields token_uri, client_email` | OAuthクライアントIDの鍵を使っている → **サービスアカウント**の鍵を作り直す |
-| `Requested entity was not found` | スプレッドシートIDが間違っている or サービスアカウントに共有されていない |
+| `Could not automatically determine credentials` | `gcloud auth application-default login` を実行する |
+| `Requested entity was not found` | スプレッドシートIDが間違っている or 自分のアカウントにアクセス権がない |
 | `APIレート制限エラー` | 自動リトライ（最大3回）される。頻発する場合は間隔を空ける |
