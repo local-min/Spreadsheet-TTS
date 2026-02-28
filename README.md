@@ -111,24 +111,32 @@ uv run python main.py --config my_config.yaml
 
 ## カスタマイズ
 
-### config.yaml の設定項目
+### config.yaml のデフォルト設定
 
 ```yaml
+# Google Sheets設定
 google_sheets:
-  spreadsheet_id: "スプレッドシートID"
-  sheet_name: ""              # シート名（空=最初のシート）
-  text_column: "A"            # テキスト列
-  start_row: 2                # 開始行（2=ヘッダー除外）
-  end_row: null               # 終了行（null=最終行まで）
+  spreadsheet_id: "あなたのスプレッドシートID"
+  sheet_name: ""                # シート名（空=最初のシート）
+  text_column: "A"              # テキストが入っている列
+  start_row: 2                  # 開始行（2=ヘッダー除外）
+  end_row: null                 # 終了行（null=最終行まで）
 
+# TTS設定
 tts:
-  voice_name: "Algieba"       # ボイス名
-  style_prompt: "..."         # 話し方の指示
+  voice_name: "Algieba"          # ボイス名
+  style_prompt: "Speak as a calm, professional corporate trainer. Use a measured pace with clear articulation. Maintain a warm but authoritative tone. Pause slightly before key concepts."
 
+# 出力設定
 output:
   directory: "./output"
   filename_prefix: ""
   filename_max_chars: 20
+
+# 認証
+auth:
+  service_account_key: "./credentials.json"
+  gemini_api_key_env: "GEMINI_API_KEY"
 ```
 
 ### 利用可能なボイス一覧（30種類）

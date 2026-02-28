@@ -6,7 +6,7 @@ from pathlib import Path
 
 from src.config import load_config
 from src.sheets import fetch_texts
-from src.tts import synthesize_and_save
+from src.tts import create_client, synthesize_and_save
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,14 +29,19 @@ def sanitize_filename(text: str, max_chars: int = 20) -> str:
 
 def parse_row_range(row_range: str) -> tuple[int | None, int | None]:
     """'1-10' 形式の行範囲を (start, end) に変換する。"""
-    if "-" in row_range:
-        parts = row_range.split("-", 1)
-        start = int(parts[0]) if parts[0] else None
-        end = int(parts[1]) if parts[1] else None
-        return start, end
-    else:
-        row = int(row_range)
-        return row, row
+    try:
+        if "-" in row_range:
+            parts = row_range.split("-", 1)
+            start = int(parts[0]) if parts[0] else None
+            end = int(parts[1]) if parts[1] else None
+            return start, end
+        else:
+            row = int(row_range)
+            return row, row
+    except ValueError:
+        raise argparse.ArgumentTypeError(
+            f"無効な行範囲です: '{row_range}'（例: '2-5' または '3'）"
+        )
 
 
 def main():
@@ -100,8 +105,8 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # TTS設定
-    api_key = config["auth"]["gemini_api_key"]
-    voice_name = config["tts"].get("voice_name", "Kore")
+    client = create_client(config["auth"]["gemini_api_key"])
+    voice_name = config["tts"].get("voice_name", "Algieba")
     style_prompt = config["tts"].get("style_prompt", "")
     prefix = config["output"].get("filename_prefix", "")
     max_chars = config["output"].get("filename_max_chars", 20)
@@ -116,6 +121,8 @@ def main():
 
         # ファイル名生成
         name_part = sanitize_filename(text, max_chars)
+        if not name_part:
+            name_part = "untitled"
         if prefix:
             filename = f"{prefix}_{i:03d}_{name_part}.wav"
         else:
@@ -123,7 +130,7 @@ def main():
         output_path = output_dir / filename
 
         try:
-            synthesize_and_save(text, output_path, api_key, voice_name, style_prompt)
+            synthesize_and_save(text, output_path, client, voice_name, style_prompt)
             logger.info("  -> 保存: %s", output_path)
             success += 1
         except Exception as e:

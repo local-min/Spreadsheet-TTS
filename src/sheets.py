@@ -42,7 +42,7 @@ def fetch_texts(config: dict) -> list[str]:
 
     # start_rowは1始まり → リストは0始まりなので -1
     start_idx = start_row - 1
-    if end_row:
+    if end_row is not None:
         values = all_values[start_idx:end_row]
     else:
         values = all_values[start_idx:]
