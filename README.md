@@ -39,10 +39,15 @@ Google Sheets  →  Python Script  →  Gemini TTS API  →  WAV Files
 4. ターミナルで ADC（Application Default Credentials）認証を実行
 
 ```bash
-gcloud auth application-default login
+# Sheets APIスコープ付きでログイン（ブラウザが開きます）
+gcloud auth application-default login \
+  --scopes="openid,https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/spreadsheets.readonly"
+
+# クォータプロジェクトの設定（API利用枠の紐付け）
+gcloud auth application-default set-quota-project YOUR_PROJECT_ID
 ```
 
-ブラウザが開くので Google アカウントでログインします。これにより自分のアカウント権限で Google Sheets にアクセスできるようになります。
+> `YOUR_PROJECT_ID` は手順2で作成したプロジェクトのIDに置き換えてください。
 
 > **補足**: サービスアカウントキーを使う場合は、キーファイルのパスを `config.yaml` の `auth.service_account_key` に設定してください。ADC より優先されます。
 

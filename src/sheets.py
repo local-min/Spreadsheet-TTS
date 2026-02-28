@@ -1,4 +1,5 @@
 import logging
+import subprocess
 from pathlib import Path
 
 import google.auth
@@ -12,6 +13,21 @@ logger = logging.getLogger(__name__)
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 
+def _get_gcloud_project() -> str | None:
+    """gcloud CLI のデフォルトプロジェクトIDを取得する。"""
+    try:
+        result = subprocess.run(
+            ["gcloud", "config", "get-value", "project"],
+            capture_output=True, text=True, timeout=5,
+        )
+        project = result.stdout.strip()
+        if result.returncode == 0 and project:
+            return project
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+    return None
+
+
 def _get_credentials(auth_config: dict):
     """認証情報を取得する。サービスアカウントキーがあればそちらを、なければADCを使用。"""
     key = auth_config.get("service_account_key", "")
@@ -22,7 +38,20 @@ def _get_credentials(auth_config: dict):
         return Credentials.from_service_account_file(str(key_path), scopes=SCOPES)
 
     logger.info("認証: Application Default Credentials (ADC)")
-    creds, _ = google.auth.default(scopes=SCOPES)
+    creds, project = google.auth.default(scopes=SCOPES)
+
+    # ADCユーザー認証ではクォータプロジェクトが必要
+    if not getattr(creds, "quota_project_id", None):
+        project = project or _get_gcloud_project()
+        if project:
+            creds = creds.with_quota_project(project)
+            logger.info("クォータプロジェクト: %s", project)
+        else:
+            raise RuntimeError(
+                "クォータプロジェクトが設定されていません。以下を実行してください:\n"
+                "  gcloud auth application-default set-quota-project YOUR_PROJECT_ID"
+            )
+
     return creds
 
 

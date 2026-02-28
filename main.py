@@ -83,7 +83,7 @@ def main():
     try:
         texts = fetch_texts(config)
     except Exception as e:
-        logger.error("スプレッドシートの読み取りに失敗しました: %s", e)
+        logger.error("スプレッドシートの読み取りに失敗しました: %r", e)
         sys.exit(1)
 
     if not texts:
