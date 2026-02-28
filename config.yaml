@@ -1,6 +1,6 @@
 # Google Sheets設定
 google_sheets:
-  spreadsheet_id: "1RmGoA9g2DD80bYBQoAxxQK9jvkI46UYF7pxuGNFnl7Q"
+  spreadsheet_id: "あなたのスプレッドシートID"
   sheet_name: ""                # シート名（空=最初のシート）
   text_column: "A"              # テキストが入っている列
   start_row: 2                  # 開始行（2=ヘッダー除外）
