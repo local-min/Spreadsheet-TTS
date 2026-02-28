@@ -24,13 +24,26 @@ Google Sheets  →  Python Script  →  Gemini TTS API  →  WAV Files
 
 ## セットアップ
 
-### 1. Gemini API キーの取得
+### 1. リポジトリのクローン
+
+```bash
+git clone https://github.com/local-min/Spreadsheet-TTS.git
+cd Spreadsheet-TTS
+```
+
+### 2. 依存パッケージのインストール
+
+```bash
+uv sync
+```
+
+### 3. Gemini API キーの取得
 
 1. [Google AI Studio](https://aistudio.google.com/apikey) にアクセス
 2. 「APIキーを作成」をクリック
 3. 表示されたAPIキーをコピーして控えておく
 
-### 2. Google Sheets API の有効化と認証
+### 4. Google Sheets API の有効化と認証
 
 1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
 2. 上部の「プロジェクトを選択」→「**新しいプロジェクト**」→ 任意の名前で作成
@@ -47,34 +60,27 @@ gcloud auth application-default login \
 gcloud auth application-default set-quota-project YOUR_PROJECT_ID
 ```
 
-> `YOUR_PROJECT_ID` は手順2で作成したプロジェクトのIDに置き換えてください。
+> `YOUR_PROJECT_ID` は手順4で作成したプロジェクトのIDに置き換えてください。
 
 > **補足**: サービスアカウントキーを使う場合は、キーファイルのパスを `config.yaml` の `auth.service_account_key` に設定してください。ADC より優先されます。
 
-### 3. プロジェクトのセットアップ
+### 5. 環境変数の設定
 
 ```bash
-# 依存パッケージのインストール
-uv sync
-
-# 環境変数の設定
 cp .env.example .env
-# .env を編集して GEMINI_API_KEY を設定
 ```
 
-### 4. config.yaml の編集
+`.env` を編集して、Gemini API キーとスプレッドシートIDを設定します。
 
-スプレッドシートIDを設定します。
-
-```yaml
-google_sheets:
-  spreadsheet_id: "あなたのスプレッドシートID"
+```
+GEMINI_API_KEY=取得したAPIキー
+SPREADSHEET_ID=あなたのスプレッドシートID
 ```
 
 > **スプレッドシートIDの確認方法**: スプレッドシートのURL
 > `https://docs.google.com/spreadsheets/d/【ここがID】/edit`
 
-### 5. スプレッドシートの準備
+### 6. スプレッドシートの準備
 
 A列にテキストを入力します（1行目はヘッダーとして除外されます）。
 
@@ -115,7 +121,7 @@ uv run python main.py --config my_config.yaml
 ```yaml
 # Google Sheets設定
 google_sheets:
-  spreadsheet_id: "あなたのスプレッドシートID"
+  spreadsheet_id: ""               # .env の SPREADSHEET_ID が優先される
   sheet_name: ""                # シート名（空=最初のシート）
   text_column: "A"              # テキストが入っている列
   start_row: 2                  # 開始行（2=ヘッダー除外）
@@ -176,6 +182,7 @@ style_prompt: "穏やかで優しいトーンで、ゆっくりと語りかけ�
 | エラー | 原因と対処 |
 |--------|-----------|
 | `環境変数 GEMINI_API_KEY が設定されていません` | `.env` ファイルにAPIキーが正しく記載されていない |
+| `スプレッドシートIDが設定されていません` | `.env` ファイルに `SPREADSHEET_ID` を設定する |
 | `Could not automatically determine credentials` | `gcloud auth application-default login` を実行する |
 | `Requested entity was not found` | スプレッドシートIDが間違っている or 自分のアカウントにアクセス権がない |
 | `APIレート制限エラー` | 自動リトライ（最大3回）される。頻発する場合は間隔を空ける |
