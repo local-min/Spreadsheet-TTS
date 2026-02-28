@@ -12,6 +12,7 @@ MODEL = "gemini-2.5-flash-preview-tts"
 SAMPLE_RATE = 24000
 SAMPLE_WIDTH = 2  # 16bit
 CHANNELS = 1
+MAX_PROMPT_BYTES = 8000
 
 # リトライ対象とする一時的エラー
 _RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
@@ -44,7 +45,17 @@ def _build_prompt(text: str, style_prompt: str) -> str:
     if style_prompt:
         parts.append(style_prompt)
     parts.append(f"Read the following text aloud exactly as written:\n\n{text}")
-    return "\n\n".join(parts)
+    prompt = "\n\n".join(parts)
+
+    byte_size = len(prompt.encode("utf-8"))
+    if byte_size > MAX_PROMPT_BYTES:
+        logger.warning(
+            "プロンプトが上限を超えています (%d / %d bytes)。"
+            "音声生成に失敗する可能性があります。",
+            byte_size, MAX_PROMPT_BYTES,
+        )
+
+    return prompt
 
 
 def _extract_audio_data(response) -> bytes:
