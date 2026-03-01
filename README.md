@@ -62,6 +62,8 @@ gcloud auth application-default set-quota-project YOUR_PROJECT_ID
 
 > `YOUR_PROJECT_ID` は手順4で作成したプロジェクトのIDに置き換えてください。
 
+> **注意**: 別のプロジェクトで `gcloud auth application-default login` を再実行すると、ここで設定したスコープとクォータプロジェクトが**上書きされます**。`PermissionError` が発生した場合は、上記2つのコマンドを再実行してください。
+
 > **補足**: サービスアカウントキーを使う場合は、キーファイルのパスを `config.yaml` の `auth.service_account_key` に設定してください。ADC より優先されます。
 
 ### 5. 環境変数の設定
@@ -184,5 +186,6 @@ style_prompt: "穏やかで優しいトーンで、ゆっくりと語りかけ�
 | `環境変数 GEMINI_API_KEY が設定されていません` | `.env` ファイルにAPIキーが正しく記載されていない |
 | `スプレッドシートIDが設定されていません` | `.env` ファイルに `SPREADSHEET_ID` を設定する |
 | `Could not automatically determine credentials` | `gcloud auth application-default login` を実行する |
+| `PermissionError` / `スプレッドシートへのアクセスが拒否されました` | ADC認証のスコープまたはクォータプロジェクトが不正。[手順4](#4-google-sheets-api-の有効化と認証)の2つのコマンドを再実行する |
 | `Requested entity was not found` | スプレッドシートIDが間違っている or 自分のアカウントにアクセス権がない |
 | `APIレート制限エラー` | 自動リトライ（最大3回）される。頻発する場合は間隔を空ける |
