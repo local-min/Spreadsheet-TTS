@@ -65,7 +65,20 @@ def fetch_texts(config: dict) -> list[str]:
     client = gspread.authorize(creds)
 
     # スプレッドシートを開く
-    spreadsheet = client.open_by_key(sheets_config["spreadsheet_id"])
+    try:
+        spreadsheet = client.open_by_key(sheets_config["spreadsheet_id"])
+    except PermissionError:
+        raise PermissionError(
+            "スプレッドシートへのアクセスが拒否されました。\n"
+            "ADC認証の場合、以下を確認してください:\n"
+            "  1. Sheets APIスコープ付きでログインしているか:\n"
+            '     gcloud auth application-default login \\\n'
+            '       --scopes="openid,https://www.googleapis.com/auth/userinfo.email,'
+            "https://www.googleapis.com/auth/cloud-platform,"
+            'https://www.googleapis.com/auth/spreadsheets.readonly"\n'
+            "  2. クォータプロジェクトにSheets APIが有効か:\n"
+            "     gcloud auth application-default set-quota-project YOUR_PROJECT_ID"
+        )
 
     # シート選択
     sheet_name = sheets_config.get("sheet_name", "")
