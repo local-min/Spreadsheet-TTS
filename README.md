@@ -46,7 +46,8 @@ uv sync
 ### 4. Google Sheets API の有効化と認証
 
 1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
-2. 上部の「プロジェクトを選択」→「**新しいプロジェクト**」→ 任意の名前で作成
+2. 上部の「プロジェクトを選択」で、手順3で Gemini API キーを作成した際に自動生成されたプロジェクト（`gen-lang-client-*` という名前）を選択
+   - 見つからない場合は「**新しいプロジェクト**」を作成しても可
 3. 左メニュー「**APIとサービス**」→「**ライブラリ**」
    - 「Google Sheets API」を検索 → **有効にする**
 4. ターミナルで ADC（Application Default Credentials）認証を実行
@@ -60,7 +61,9 @@ gcloud auth application-default login \
 gcloud auth application-default set-quota-project YOUR_PROJECT_ID
 ```
 
-> `YOUR_PROJECT_ID` は手順4で作成したプロジェクトのIDに置き換えてください。
+> `YOUR_PROJECT_ID` は手順4-2で選択（または作成）したプロジェクトのIDに置き換えてください。Google Sheets API が有効になっているプロジェクトを指定する必要があります。プロジェクトIDは [Google Cloud Console](https://console.cloud.google.com/) のダッシュボード上部で確認できます。
+
+> **クォータプロジェクトとは**: ADC（ユーザー認証）で API を呼び出す際、どの GCP プロジェクトの API 利用枠を使うかを指定するものです。手順3で Gemini API キーを作成すると、Google AI Studio が `gen-lang-client-*` という名前の GCP プロジェクトを自動作成します。このプロジェクトIDをクォータプロジェクトとして指定できます。
 
 > **注意**: 別のプロジェクトで `gcloud auth application-default login` を再実行すると、ここで設定したスコープとクォータプロジェクトが**上書きされます**。`PermissionError` が発生した場合は、上記2つのコマンドを再実行してください。
 
